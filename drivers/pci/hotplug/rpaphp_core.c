@@ -333,6 +333,7 @@ int rpaphp_add_slot(struct device_node *dn)
 				indexes[i + 1], name, type);
 
 		retval = rpaphp_enable_slot(slot);
+
 		dbg("retval %d rpaphp_enable_slot %d\n", retval, i);
 		if (!retval) {	
 			retval = rpaphp_register_slot(slot);
