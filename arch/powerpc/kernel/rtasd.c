@@ -529,6 +529,7 @@ EXPORT_SYMBOL_GPL(rtas_cancel_event_scan);
 static int __init rtas_init(void)
 {
 	struct proc_dir_entry *entry;
+	int start_scan = 1;
 
 	if (!machine_is(pseries) && !machine_is(chrp))
 		return 0;
@@ -537,19 +538,19 @@ static int __init rtas_init(void)
 	event_scan = rtas_token("event-scan");
 	if (event_scan == RTAS_UNKNOWN_SERVICE) {
 		printk(KERN_INFO "rtasd: No event-scan on system\n");
-		return -ENODEV;
+		start_scan = 0;
 	}
 
 	rtas_event_scan_rate = rtas_token("rtas-event-scan-rate");
 	if (rtas_event_scan_rate == RTAS_UNKNOWN_SERVICE) {
 		printk(KERN_ERR "rtasd: no rtas-event-scan-rate on system\n");
-		return -ENODEV;
+		start_scan = 0;
 	}
 
 	if (!rtas_event_scan_rate) {
 		/* Broken firmware: take a rate of zero to mean don't scan */
 		printk(KERN_DEBUG "rtasd: scan rate is 0, not scanning\n");
-		return 0;
+		start_scan = 0;
 	}
 
 	/* Make room for the sequence number */
@@ -567,7 +568,10 @@ static int __init rtas_init(void)
 	if (!entry)
 		printk(KERN_ERR "Failed to create error_log proc entry\n");
 
-	start_event_scan();
+	if (start_scan)
+		start_event_scan();
+	else
+		logging_enabled = 1;
 
 	return 0;
 }

@@ -142,6 +142,7 @@ static struct pci_dev *dlpar_find_new_dev(struct pci_bus *parent,
 
 static void dlpar_pci_add_bus(struct device_node *dn)
 {
+
 	struct pci_dn *pdn = PCI_DN(dn);
 	struct pci_controller *phb = pdn->phb;
 	struct pci_dev *dev = NULL;
@@ -161,6 +162,9 @@ static void dlpar_pci_add_bus(struct device_node *dn)
 	    dev->hdr_type == PCI_HEADER_TYPE_CARDBUS)
 		of_scan_pci_bridge(dev);
 
+	printk(KERN_ERR "%s: device: %p, subordinate: %p\n",
+	       __func__, dev ? dev : NULL, dev ? dev->subordinate : NULL);
+			
 	/* Map IO space for child bus, which may or may not succeed */
 	pcibios_map_io_space(dev->subordinate);
 

@@ -820,6 +820,7 @@ static int virtscsi_init(struct virtio_device *vdev,
 	struct virtqueue **vqs;
 
 	num_vqs = vscsi->num_queues + VIRTIO_SCSI_VQ_BASE;
+	printk(KERN_WARNING "virtscsi_init num_vqs: %d\n", num_vqs);
 	vqs = kmalloc(num_vqs * sizeof(struct virtqueue *), GFP_KERNEL);
 	callbacks = kmalloc(num_vqs * sizeof(vq_callback_t *), GFP_KERNEL);
 	names = kmalloc(num_vqs * sizeof(char *), GFP_KERNEL);
@@ -843,6 +844,7 @@ static int virtscsi_init(struct virtio_device *vdev,
 	if (err)
 		goto out;
 
+	printk(KERN_WARNING "virtscsi_init found vqs\n");
 	virtscsi_init_vq(&vscsi->ctrl_vq, vqs[0]);
 	virtscsi_init_vq(&vscsi->event_vq, vqs[1]);
 	for (i = VIRTIO_SCSI_VQ_BASE; i < num_vqs; i++)
@@ -850,10 +852,10 @@ static int virtscsi_init(struct virtio_device *vdev,
 				 vqs[i]);
 
 	virtscsi_set_affinity(vscsi, true);
-
+	printk(KERN_WARNING "virtscsi_init set affinity\n");
 	virtscsi_config_set(vdev, cdb_size, VIRTIO_SCSI_CDB_SIZE);
 	virtscsi_config_set(vdev, sense_size, VIRTIO_SCSI_SENSE_SIZE);
-
+	printk(KERN_WARNING "virtscsi_config_set\n");
 	if (virtio_has_feature(vdev, VIRTIO_SCSI_F_HOTPLUG))
 		virtscsi_kick_event_all(vscsi);
 
@@ -863,8 +865,11 @@ out:
 	kfree(names);
 	kfree(callbacks);
 	kfree(vqs);
-	if (err)
+	if (err) {
+		printk(KERN_WARNING "removing vqs\n");
 		virtscsi_remove_vqs(vdev);
+	}
+	
 	return err;
 }
 

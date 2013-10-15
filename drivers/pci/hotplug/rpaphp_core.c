@@ -37,7 +37,7 @@
 				/* and pci_do_scan_bus */
 #include "rpaphp.h"
 
-bool rpaphp_debug;
+bool rpaphp_debug = 1;
 LIST_HEAD(rpaphp_slot_head);
 
 #define DRIVER_VERSION	"0.1"
@@ -244,7 +244,7 @@ int rpaphp_get_drc_props(struct device_node *dn, int *drc_index,
 
 static int is_php_type(char *drc_type)
 {
-	unsigned long value;
+  unsigned long value;
 	char *endptr;
 
 	/* PCI Hotplug nodes have an integer for drc_type */
@@ -333,12 +333,15 @@ int rpaphp_add_slot(struct device_node *dn)
 				indexes[i + 1], name, type);
 
 		retval = rpaphp_enable_slot(slot);
-		if (!retval)
+		dbg("retval %d rpaphp_enable_slot %d\n", retval, i);
+		if (!retval) {	
 			retval = rpaphp_register_slot(slot);
-
-		if (retval)
+			dbg("retval rpaphp %d slot %d\n", retval, i);
+		}
+		
+		if (retval)	
 			dealloc_slot_struct(slot);
-
+		
 		name += strlen(name) + 1;
 		type += strlen(type) + 1;
 	}
